@@ -1,29 +1,37 @@
-name: Android CI
+name: Build CosmoDL APK
 
 on:
-  pull_request:
+  push:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: set up JDK 21
-        uses: actions/setup-java@v3
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: gradle
+    - name: set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: gradle
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
 
-      - uses: gradle/actions/setup-gradle@v3
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: Build with Gradle
-        run: ./gradlew buildGenericRelease
+    - uses: gradle/actions/setup-gradle@v3
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew assembleGenericRelease || ./gradlew buildGenericRelease
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: CosmoDL-Release-APK
+        path: app/build/outputs/apk/**/*.apk
